@@ -25,9 +25,12 @@ export function BrandMark({
 
   useEffect(() => {
     fetch("/api/settings")
-      .then((r) => r.json())
+      .then(async (r) => {
+        if (!r.ok) return null;
+        return r.json();
+      })
       .then((data) => {
-        if (data?.companyName) setSettings(data);
+        if (data?.companyName && data?.logoPath) setSettings(data);
       })
       .catch(() => undefined);
   }, []);
