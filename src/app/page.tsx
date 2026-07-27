@@ -34,24 +34,40 @@ export default async function HomePage() {
               dentales y tu laboratorio controle estados, montos y pagos desde el celular.
             </p>
             <div className="role-choice">
-              <Link href="/login/dueno" className="role-card animate-rise delay-1">
+              <div className="role-card animate-rise delay-1">
                 <div className="text-xs uppercase tracking-wide text-[var(--accent)] font-bold mb-2">
                   Laboratorio
                 </div>
-                <h2 className="text-2xl m-0 mb-2">Entrar como dueño</h2>
-                <p className="text-sm text-[var(--muted)] m-0">
-                  Enrolar doctores, ver solicitudes, montos, estados y estadísticas.
+                <h2 className="text-2xl m-0 mb-2">Dueño / laboratorio</h2>
+                <p className="text-sm text-[var(--muted)] mb-4">
+                  Gestiona solicitudes, montos, estados, doctores y estadísticas.
                 </p>
-              </Link>
-              <Link href="/login/doctor" className="role-card animate-rise delay-2">
+                <div className="flex flex-wrap gap-2">
+                  <Link href="/login/dueno" className="btn btn-primary">
+                    Ingresar
+                  </Link>
+                  <Link href="/registro/dueno" className="btn btn-secondary">
+                    Registrarme
+                  </Link>
+                </div>
+              </div>
+              <div className="role-card animate-rise delay-2">
                 <div className="text-xs uppercase tracking-wide text-[var(--accent-warm)] font-bold mb-2">
                   Clínica
                 </div>
-                <h2 className="text-2xl m-0 mb-2">Entrar como doctor</h2>
-                <p className="text-sm text-[var(--muted)] m-0">
-                  Ingresar pacientes y enviar trabajos de prótesis al laboratorio.
+                <h2 className="text-2xl m-0 mb-2">Doctor</h2>
+                <p className="text-sm text-[var(--muted)] mb-4">
+                  Crea tu cuenta y envía solicitudes de prótesis al laboratorio.
                 </p>
-              </Link>
+                <div className="flex flex-wrap gap-2">
+                  <Link href="/login/doctor" className="btn btn-primary">
+                    Ingresar
+                  </Link>
+                  <Link href="/registro/doctor" className="btn btn-secondary">
+                    Registrarme
+                  </Link>
+                </div>
+              </div>
             </div>
           </section>
 
@@ -66,7 +82,7 @@ export default async function HomePage() {
             <div className="relative">
               <p className="text-sm font-semibold text-[var(--brand)] mb-3">Flujo de trabajo</p>
               <ol className="space-y-4 m-0 pl-5 text-[var(--ink)]">
-                <li>El laboratorio enrola al doctor con correo y clave.</li>
+                <li>El laboratorio y los doctores se registran con su correo y clave.</li>
                 <li>El doctor crea la solicitud del paciente desde el formulario.</li>
                 <li>El laboratorio asigna monto, estado y comprobante de pago.</li>
                 <li>Las estadísticas resumen ventas por día, semana, mes y año.</li>

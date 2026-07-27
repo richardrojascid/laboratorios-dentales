@@ -338,7 +338,7 @@ h3,
   transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
-.role-card:hover {
+a.role-card:hover {
   transform: translateY(-3px);
   border-color: var(--accent);
 }

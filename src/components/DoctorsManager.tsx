@@ -72,9 +72,10 @@ export function DoctorsManager() {
   return (
     <div className="space-y-4">
       <form onSubmit={onSubmit} className="panel p-5 sm:p-6 animate-rise">
-        <h2 className="text-2xl mb-1">Enrolar doctor</h2>
+        <h2 className="text-2xl mb-1">Enrolar doctor (opcional)</h2>
         <p className="text-sm text-[var(--muted)] mb-5">
-          Crea acceso con correo Gmail y contraseña temporal.
+          Los doctores también pueden registrarse solos. Usa esto solo si quieres
+          crearles una cuenta temporal.
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="field">

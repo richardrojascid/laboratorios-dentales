@@ -94,13 +94,24 @@ export function LoginForm({
               {loading ? "Ingresando..." : "Ingresar"}
             </button>
           </form>
-          <div className="mt-4 flex flex-wrap gap-3 text-sm">
-            <Link href="/recuperar" className="text-[var(--brand)] font-semibold">
-              Recuperar contraseña
-            </Link>
-            <Link href="/" className="text-[var(--muted)]">
-              Volver al inicio
-            </Link>
+          <div className="mt-5 space-y-3 text-sm">
+            <p className="m-0">
+              ¿No tienes cuenta?{" "}
+              <Link
+                href={role === "OWNER" ? "/registro/dueno" : "/registro/doctor"}
+                className="text-[var(--brand)] font-semibold"
+              >
+                Regístrate aquí
+              </Link>
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Link href="/recuperar" className="text-[var(--brand)] font-semibold">
+                Recuperar contraseña
+              </Link>
+              <Link href="/" className="text-[var(--muted)]">
+                Volver al inicio
+              </Link>
+            </div>
           </div>
         </div>
       </div>
