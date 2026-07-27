@@ -1,3 +1,4 @@
+import "@/lib/env";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
@@ -14,6 +15,16 @@ const schema = z.object({
 
 export async function POST(req: Request) {
   try {
+    if (!process.env.DATABASE_URL) {
+      return NextResponse.json(
+        {
+          error:
+            "Falta configuración de base de datos. Ejecuta: npm run db:setup",
+        },
+        { status: 500 }
+      );
+    }
+
     const body = await req.json();
     const data = schema.parse(body);
     const email = data.email.toLowerCase().trim();
@@ -75,6 +86,21 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    const message = e instanceof Error ? e.message : "";
+    if (
+      message.includes("DATABASE_URL") ||
+      message.includes("Environment variable")
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Falta el archivo .env. Ejecuta en la carpeta del proyecto: npm run db:setup",
+        },
+        { status: 500 }
+      );
+    }
+
     console.error(e);
     return NextResponse.json(
       { error: "No se pudo completar el registro" },
