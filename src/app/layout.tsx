@@ -1,3 +1,4 @@
+import "@/lib/env";
 import type { Metadata } from "next";
 import { Fraunces, Outfit } from "next/font/google";
 import { Providers } from "@/components/Providers";

@@ -14,26 +14,27 @@ App web responsive para que el laboratorio (dueño) reciba solicitudes de próte
 
 ## Configuración
 
-1. Copia variables de entorno:
-
-```bash
-cp .env.example .env
-```
-
-2. Instala y prepara la base de datos:
+1. Instala y prepara la base de datos (crea `.env` automáticamente si falta):
 
 ```bash
 npm install
 npm run db:setup
 ```
 
-3. Arranca en desarrollo:
+2. Arranca en desarrollo:
 
 ```bash
 npm run dev
 ```
 
 Abre [http://localhost:3000](http://localhost:3000).
+
+Si ves el error `Environment variable not found: DATABASE_URL`, ejecuta:
+
+```powershell
+npm run db:setup
+npm run dev
+```
 
 ### Credenciales iniciales
 
