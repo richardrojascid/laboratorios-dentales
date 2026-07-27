@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  name          String
+  role          String    // OWNER | DOCTOR
+  phone         String?
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  requests      WorkRequest[]
+  resetTokens   PasswordResetToken[]
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model FormField {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  label       String
+  type        String   // text | textarea | date | number | select
+  options     String?  // JSON array for select
+  required    Boolean  @default(false)
+  visibleDoctor Boolean @default(true)
+  visibleOwner  Boolean @default(true)
+  editableOwner Boolean @default(false)
+  sortOrder   Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model WorkRequest {
+  id              String   @id @default(cuid())
+  doctorId        String
+  doctor          User     @relation(fields: [doctorId], references: [id])
+  patientName     String
+  receptionDate   DateTime?
+  deliveryDate    DateTime?
+  description     String
+  amount          Float?
+  workStatus      String   @default("POR_TOMAR") // POR_TOMAR | EN_PROCESO | TERMINADO
+  paymentStatus   String   @default("NO_PAGADO") // PAGADO | NO_PAGADO
+  receiptPath     String?
+  customFields    String   @default("{}") // JSON
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model AppSettings {
+  id          String   @id @default("default")
+  companyName String   @default("ArcadaLab")
+  logoPath    String   @default("/logo.svg")
+  updatedAt   DateTime @updatedAt
+}
