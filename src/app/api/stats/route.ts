@@ -70,9 +70,9 @@ export async function GET(req: Request) {
   const byWorkStatus = ["POR_TOMAR", "EN_PROCESO", "TERMINADO"].map((status) => ({
     name:
       status === "POR_TOMAR"
-        ? "Por tomar"
+        ? "Solicitado"
         : status === "EN_PROCESO"
-          ? "En proceso"
+          ? "Trabajo iniciado"
           : "Terminado",
     value: requests.filter((r) => r.workStatus === status).length,
     key: status,

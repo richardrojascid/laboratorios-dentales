@@ -117,7 +117,7 @@ export function RegisterForm({
                   className="input"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
-                  placeholder="Ej: ArcadaLab"
+                  placeholder="Ej: Laboratorio Art-Dental"
                 />
               </div>
             )}
