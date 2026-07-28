@@ -99,6 +99,8 @@ export function RequestsBoard({ mode }: { mode: "owner" | "doctor" }) {
       TERMINADO: [],
     };
     for (const item of items) {
+      // Lo pagado solo vive en la columna Pagado
+      if (item.paymentStatus === "PAGADO") continue;
       (map[item.workStatus] || map.POR_TOMAR).push(item);
     }
     return map;
@@ -125,10 +127,15 @@ export function RequestsBoard({ mode }: { mode: "owner" | "doctor" }) {
     patch: { workStatus?: string; paymentStatus?: string }
   ) {
     if (mode !== "owner") return;
+    const payload = { ...patch };
+    // Si se marca pagado, también queda como terminado para consistencia
+    if (patch.paymentStatus === "PAGADO" && !patch.workStatus) {
+      payload.workStatus = "TERMINADO";
+    }
     const res = await fetch(`/api/requests/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(patch),
+      body: JSON.stringify(payload),
     });
     if (res.ok) load();
   }
@@ -300,7 +307,7 @@ export function RequestsBoard({ mode }: { mode: "owner" | "doctor" }) {
           {mode === "owner" ? "Solicitudes de trabajo" : "Mis solicitudes"}
         </h2>
         <p className="text-sm text-[var(--muted)] m-0">
-          Tablero por estado: Solicitado, Trabajo iniciado, Terminado y Pagado.
+          Al marcar como pagado, la solicitud pasa solo a la columna Pagado.
         </p>
       </div>
 
