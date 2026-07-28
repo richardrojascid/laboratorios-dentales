@@ -22,7 +22,7 @@ export function AppHeader({
     <header className="app-nav">
       <div className="shell py-3 flex flex-col gap-3">
         <div className="flex items-center justify-between gap-3">
-          <BrandMark href={homeHref} size={36} />
+          <BrandMark href={homeHref} size={56} />
           <div className="flex items-center gap-2">
             {userName && (
               <span className="hidden sm:inline text-sm text-[var(--muted)] max-w-[160px] truncate">

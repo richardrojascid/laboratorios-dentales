@@ -58,9 +58,10 @@ export function SettingsForm() {
         <Image
           src={logoPath}
           alt={companyName}
-          width={72}
-          height={72}
-          className="rounded-2xl border border-[var(--line)]"
+          width={160}
+          height={120}
+          className="rounded-2xl border border-[var(--line)] object-contain bg-white"
+          style={{ width: 160, height: 120 }}
           unoptimized
         />
         <div>

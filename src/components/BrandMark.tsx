@@ -11,8 +11,8 @@ type Settings = {
 };
 
 export function BrandMark({
-  size = 40,
-  showName = true,
+  size = 64,
+  showName = false,
   href = "/",
 }: {
   size?: number;
@@ -37,15 +37,19 @@ export function BrandMark({
       .catch(() => undefined);
   }, []);
 
+  // Logo horizontal Art-Dental (~1.3:1). size = altura, como el ícono cuadrado anterior.
+  const height = size;
+  const width = Math.round(size * 1.35);
+
   return (
     <Link href={href} className="inline-flex items-center gap-3">
       <Image
         src={settings.logoPath}
         alt={settings.companyName}
-        width={Math.round(size * 1.35)}
-        height={size}
-        className="rounded-lg object-contain bg-white"
-        style={{ width: Math.round(size * 1.55), height: size }}
+        width={width}
+        height={height}
+        className="brand-logo rounded-xl object-contain bg-white"
+        style={{ width, height, maxWidth: "100%" }}
         unoptimized
         priority
       />
@@ -54,7 +58,7 @@ export function BrandMark({
           <span
             className="display font-semibold tracking-tight block"
             style={{
-              fontSize: size > 42 ? "1.35rem" : "1.05rem",
+              fontSize: size > 56 ? "1.45rem" : "1.1rem",
               color: "var(--brand-dark)",
             }}
           >

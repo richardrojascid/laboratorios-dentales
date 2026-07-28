@@ -83,7 +83,7 @@ export function RegisterForm({
     <div className="shell hero-home">
       <div className="max-w-md mx-auto w-full animate-rise">
         <div className="mb-8 flex justify-center">
-          <BrandMark size={56} />
+          <BrandMark size={96} />
         </div>
         <div className="panel p-6 sm:p-8">
           <h1 className="text-3xl mb-2">{title}</h1>

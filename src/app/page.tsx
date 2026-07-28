@@ -19,13 +19,14 @@ export default async function HomePage() {
       <div className="shell">
         <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] items-center">
           <section className="animate-rise">
-            <div className="inline-flex items-center gap-3 mb-6">
+            <div className="mb-6">
               <Image
                 src={logoPath}
                 alt={companyName}
-                width={64}
-                height={64}
-                className="rounded-2xl animate-float"
+                width={280}
+                height={210}
+                className="rounded-2xl animate-float object-contain bg-white"
+                style={{ width: "min(280px, 70vw)", height: "auto" }}
                 unoptimized
                 priority
               />
