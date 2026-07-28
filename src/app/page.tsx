@@ -9,8 +9,10 @@ export default async function HomePage() {
     where: { id: "default" },
   }).catch(() => null);
 
-  const companyName = settings?.companyName || "ArcadaLab";
-  const logoPath = settings?.logoPath || "/logo.svg";
+  const companyName = settings?.companyName || "Laboratorio Art-Dental";
+  const logoPath = settings?.logoPath || "/logo-art-dental.jpg";
+  const tagline =
+    (settings as { tagline?: string } | null)?.tagline || "Devolvemos sonrisas";
 
   return (
     <main className="hero-home">
@@ -29,6 +31,7 @@ export default async function HomePage() {
               />
             </div>
             <h1 className="hero-brand">{companyName}</h1>
+            <p className="text-[var(--brand)] font-semibold mb-3">{tagline}</p>
             <p className="hero-copy">
               Plataforma web para que tus doctores envíen solicitudes de prótesis
               dentales y tu laboratorio controle estados, montos y pagos desde el celular.

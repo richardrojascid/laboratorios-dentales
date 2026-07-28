@@ -46,6 +46,20 @@ model FormField {
   updatedAt   DateTime @updatedAt
 }
 
+model PriceItem {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  category    String
+  priceNeto   Float
+  priceIva    Float?
+  note        String?
+  active      Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 model WorkRequest {
   id              String   @id @default(cuid())
   doctorId        String
@@ -59,6 +73,7 @@ model WorkRequest {
   paymentStatus   String   @default("NO_PAGADO") // PAGADO | NO_PAGADO
   receiptPath     String?
   customFields    String   @default("{}") // JSON
+  lineItems       String   @default("[]") // JSON [{code,name,price}]
   notes           String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -66,7 +81,8 @@ model WorkRequest {
 
 model AppSettings {
   id          String   @id @default("default")
-  companyName String   @default("ArcadaLab")
-  logoPath    String   @default("/logo.svg")
+  companyName String   @default("Laboratorio Art-Dental")
+  logoPath    String   @default("/logo-art-dental.jpg")
+  tagline     String   @default("Devolvemos sonrisas")
   updatedAt   DateTime @updatedAt
 }

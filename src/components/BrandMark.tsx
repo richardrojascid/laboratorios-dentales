@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 type Settings = {
   companyName: string;
   logoPath: string;
+  tagline?: string;
 };
 
 export function BrandMark({
@@ -19,8 +20,9 @@ export function BrandMark({
   href?: string;
 }) {
   const [settings, setSettings] = useState<Settings>({
-    companyName: "ArcadaLab",
-    logoPath: "/logo.svg",
+    companyName: "Laboratorio Art-Dental",
+    logoPath: "/logo-art-dental.jpg",
+    tagline: "Devolvemos sonrisas",
   });
 
   useEffect(() => {
@@ -40,18 +42,29 @@ export function BrandMark({
       <Image
         src={settings.logoPath}
         alt={settings.companyName}
-        width={size}
+        width={Math.round(size * 1.35)}
         height={size}
-        className="rounded-xl"
+        className="rounded-lg object-contain bg-white"
+        style={{ width: Math.round(size * 1.55), height: size }}
         unoptimized
         priority
       />
       {showName && (
-        <span
-          className="display font-semibold tracking-tight"
-          style={{ fontSize: size > 42 ? "1.55rem" : "1.15rem", color: "var(--brand-dark)" }}
-        >
-          {settings.companyName}
+        <span className="leading-tight">
+          <span
+            className="display font-semibold tracking-tight block"
+            style={{
+              fontSize: size > 42 ? "1.35rem" : "1.05rem",
+              color: "var(--brand-dark)",
+            }}
+          >
+            {settings.companyName}
+          </span>
+          {settings.tagline && (
+            <span className="block text-xs text-[var(--muted)]">
+              {settings.tagline}
+            </span>
+          )}
         </span>
       )}
     </Link>

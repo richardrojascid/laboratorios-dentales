@@ -4,8 +4,8 @@ import { FormEvent, useEffect, useState } from "react";
 import Image from "next/image";
 
 export function SettingsForm() {
-  const [companyName, setCompanyName] = useState("ArcadaLab");
-  const [logoPath, setLogoPath] = useState("/logo.svg");
+  const [companyName, setCompanyName] = useState("Laboratorio Art-Dental");
+  const [logoPath, setLogoPath] = useState("/logo-art-dental.jpg");
   const [logo, setLogo] = useState<File | null>(null);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);

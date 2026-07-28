@@ -50,18 +50,19 @@ export async function PATCH(req: Request) {
         logoPath = `/uploads/${filename}`;
       }
 
-      const updated = await prisma.appSettings.upsert({
-        where: { id: "default" },
-        update: {
-          companyName: companyName || current?.companyName || "ArcadaLab",
-          logoPath,
-        },
-        create: {
-          id: "default",
-          companyName: companyName || "ArcadaLab",
-          logoPath,
-        },
-      });
+const updated = await prisma.appSettings.upsert({
+      where: { id: "default" },
+      update: {
+        companyName: companyName || current?.companyName || "Laboratorio Art-Dental",
+        logoPath,
+      },
+      create: {
+        id: "default",
+        companyName: companyName || "Laboratorio Art-Dental",
+        logoPath,
+        tagline: "Devolvemos sonrisas",
+      },
+    });
 
       return NextResponse.json(updated);
     }
@@ -73,11 +74,12 @@ export async function PATCH(req: Request) {
         companyName: body.companyName,
         logoPath: body.logoPath,
       },
-      create: {
-        id: "default",
-        companyName: body.companyName || "ArcadaLab",
-        logoPath: body.logoPath || "/logo.svg",
-      },
+create: {
+      id: "default",
+      companyName: body.companyName || "Laboratorio Art-Dental",
+      logoPath: body.logoPath || "/logo-art-dental.jpg",
+      tagline: "Devolvemos sonrisas",
+    },
     });
 
     return NextResponse.json(updated);

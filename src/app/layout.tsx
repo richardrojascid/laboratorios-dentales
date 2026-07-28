@@ -15,7 +15,7 @@ const body = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "ArcadaLab — Laboratorio de prótesis dentales",
+  title: "Laboratorio Art-Dental — Devolvemos sonrisas",
   description:
     "Gestión de solicitudes de prótesis dentales entre laboratorio y doctores.",
 };

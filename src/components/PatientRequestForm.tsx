@@ -1,6 +1,10 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import {
+  PriceItemPicker,
+  SelectedLine,
+} from "@/components/PriceItemPicker";
 
 type FormField = {
   id: string;
@@ -9,8 +13,6 @@ type FormField = {
   type: string;
   options: string | null;
   required: boolean;
-  visibleDoctor: boolean;
-  editableOwner?: boolean;
 };
 
 const CORE_KEYS = new Set([
@@ -20,11 +22,14 @@ const CORE_KEYS = new Set([
   "description",
   "notes",
   "amount",
+  "prosthesisType",
 ]);
 
 export function PatientRequestForm({ onCreated }: { onCreated?: () => void }) {
   const [fields, setFields] = useState<FormField[]>([]);
   const [values, setValues] = useState<Record<string, string>>({});
+  const [lineItems, setLineItems] = useState<SelectedLine[]>([]);
+  const [amount, setAmount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -33,7 +38,11 @@ export function PatientRequestForm({ onCreated }: { onCreated?: () => void }) {
     fetch("/api/fields?audience=doctor")
       .then((r) => r.json())
       .then((data) => {
-        const list = Array.isArray(data) ? data.filter((f: FormField) => f.key !== "amount") : [];
+        const list = Array.isArray(data)
+          ? data.filter(
+              (f: FormField) => f.key !== "amount" && f.key !== "prosthesisType"
+            )
+          : [];
         setFields(list);
       })
       .catch(() => setError("No se pudieron cargar los campos"));
@@ -49,6 +58,12 @@ export function PatientRequestForm({ onCreated }: { onCreated?: () => void }) {
     setError("");
     setMessage("");
 
+    if (lineItems.length === 0) {
+      setLoading(false);
+      setError("Selecciona al menos un trabajo de la lista de precios");
+      return;
+    }
+
     const customFields: Record<string, string> = {};
     for (const field of fields) {
       if (!CORE_KEYS.has(field.key) && values[field.key]) {
@@ -56,13 +71,19 @@ export function PatientRequestForm({ onCreated }: { onCreated?: () => void }) {
       }
     }
 
+    const description =
+      values.description?.trim() ||
+      lineItems.map((l) => `${l.code} ${l.name}`).join(" · ");
+
     const payload = {
       patientName: values.patientName || "",
       receptionDate: values.receptionDate || null,
       deliveryDate: values.deliveryDate || null,
-      description: values.description || "",
+      description,
       notes: values.notes || null,
       customFields,
+      lineItems,
+      amount,
     };
 
     const res = await fetch("/api/requests", {
@@ -81,6 +102,8 @@ export function PatientRequestForm({ onCreated }: { onCreated?: () => void }) {
 
     setMessage("Solicitud enviada correctamente");
     setValues({});
+    setLineItems([]);
+    setAmount(0);
     onCreated?.();
   }
 
@@ -121,7 +144,13 @@ export function PatientRequestForm({ onCreated }: { onCreated?: () => void }) {
     return (
       <input
         className="input"
-        type={field.type === "number" ? "number" : field.type === "date" ? "date" : "text"}
+        type={
+          field.type === "number"
+            ? "number"
+            : field.type === "date"
+              ? "date"
+              : "text"
+        }
         required={field.required}
         value={value}
         onChange={(e) => setValue(field.key, e.target.value)}
@@ -134,7 +163,7 @@ export function PatientRequestForm({ onCreated }: { onCreated?: () => void }) {
     <form onSubmit={onSubmit} className="panel p-5 sm:p-6 animate-rise">
       <h2 className="text-2xl mb-1">Nueva solicitud de paciente</h2>
       <p className="text-[var(--muted)] mb-5 text-sm">
-        Completa los datos del trabajo de prótesis dental.
+        Completa los datos y selecciona los trabajos desde la lista de precios.
       </p>
 
       {fields.map((field) => (
@@ -146,6 +175,16 @@ export function PatientRequestForm({ onCreated }: { onCreated?: () => void }) {
           {renderField(field)}
         </div>
       ))}
+
+      <div className="field">
+        <PriceItemPicker
+          value={lineItems}
+          onChange={(items, total) => {
+            setLineItems(items);
+            setAmount(total);
+          }}
+        />
+      </div>
 
       {error && <p className="text-sm text-[var(--danger)] mb-3">{error}</p>}
       {message && <p className="text-sm text-[var(--success)] mb-3">{message}</p>}

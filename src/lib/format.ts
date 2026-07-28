@@ -15,8 +15,8 @@ export function formatDate(value: Date | string | null | undefined) {
 }
 
 export const WORK_STATUS_LABELS: Record<string, string> = {
-  POR_TOMAR: "Por tomar",
-  EN_PROCESO: "En proceso",
+  POR_TOMAR: "Solicitado",
+  EN_PROCESO: "Trabajo iniciado",
   TERMINADO: "Terminado",
 };
 

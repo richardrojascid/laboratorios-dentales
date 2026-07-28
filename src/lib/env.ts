@@ -21,8 +21,9 @@ if (!process.env.NEXTAUTH_URL) {
 
 export const defaultSettings = {
   id: "default",
-  companyName: "ArcadaLab",
-  logoPath: "/logo.svg",
+  companyName: "Laboratorio Art-Dental",
+  logoPath: "/logo-art-dental.jpg",
+  tagline: "Devolvemos sonrisas",
 };
 
 export function databaseFileExists() {

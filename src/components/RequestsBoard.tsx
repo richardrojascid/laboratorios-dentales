@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   formatCLP,
   formatDate,
-  PAYMENT_STATUS_COLORS,
-  PAYMENT_STATUS_LABELS,
-  WORK_STATUS_COLORS,
   WORK_STATUS_LABELS,
 } from "@/lib/format";
+import {
+  PriceItemPicker,
+  SelectedLine,
+} from "@/components/PriceItemPicker";
 
 type RequestItem = {
   id: string;
@@ -22,30 +23,52 @@ type RequestItem = {
   receiptPath: string | null;
   notes: string | null;
   customFields: string;
+  lineItems?: string;
   createdAt: string;
   doctor: { id: string; name: string; email: string };
 };
+
+const WORK_COLUMNS = [
+  { key: "POR_TOMAR", title: "Solicitado" },
+  { key: "EN_PROCESO", title: "Trabajo iniciado" },
+  { key: "TERMINADO", title: "Terminado" },
+] as const;
+
+function parseLines(raw?: string | null): SelectedLine[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function PaymentBadge({ status }: { status: string }) {
+  const paid = status === "PAGADO";
+  return (
+    <span className={`pay-badge ${paid ? "pay-paid" : "pay-unpaid"}`}>
+      {paid ? "Pagado" : "No pagado"}
+    </span>
+  );
+}
 
 export function RequestsBoard({ mode }: { mode: "owner" | "doctor" }) {
   const [items, setItems] = useState<RequestItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<RequestItem | null>(null);
-  const [workFilter, setWorkFilter] = useState("");
-  const [paymentFilter, setPaymentFilter] = useState("");
   const [saving, setSaving] = useState(false);
   const [amount, setAmount] = useState("");
   const [workStatus, setWorkStatus] = useState("POR_TOMAR");
   const [paymentStatus, setPaymentStatus] = useState("NO_PAGADO");
   const [notes, setNotes] = useState("");
   const [receipt, setReceipt] = useState<File | null>(null);
+  const [lineItems, setLineItems] = useState<SelectedLine[]>([]);
   const [message, setMessage] = useState("");
 
   async function load() {
     setLoading(true);
-    const params = new URLSearchParams();
-    if (workFilter) params.set("workStatus", workFilter);
-    if (paymentFilter) params.set("paymentStatus", paymentFilter);
-    const res = await fetch(`/api/requests?${params.toString()}`);
+    const res = await fetch(`/api/requests`);
     const data = await res.json();
     setItems(Array.isArray(data) ? data : []);
     setLoading(false);
@@ -53,8 +76,24 @@ export function RequestsBoard({ mode }: { mode: "owner" | "doctor" }) {
 
   useEffect(() => {
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [workFilter, paymentFilter]);
+  }, []);
+
+  const byStatus = useMemo(() => {
+    const map: Record<string, RequestItem[]> = {
+      POR_TOMAR: [],
+      EN_PROCESO: [],
+      TERMINADO: [],
+    };
+    for (const item of items) {
+      (map[item.workStatus] || map.POR_TOMAR).push(item);
+    }
+    return map;
+  }, [items]);
+
+  const paidItems = useMemo(
+    () => items.filter((i) => i.paymentStatus === "PAGADO"),
+    [items]
+  );
 
   function openDetail(item: RequestItem) {
     setSelected(item);
@@ -62,8 +101,22 @@ export function RequestsBoard({ mode }: { mode: "owner" | "doctor" }) {
     setWorkStatus(item.workStatus);
     setPaymentStatus(item.paymentStatus);
     setNotes(item.notes || "");
+    setLineItems(parseLines(item.lineItems));
     setReceipt(null);
     setMessage("");
+  }
+
+  async function quickUpdate(
+    id: string,
+    patch: { workStatus?: string; paymentStatus?: string }
+  ) {
+    if (mode !== "owner") return;
+    const res = await fetch(`/api/requests/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(patch),
+    });
+    if (res.ok) load();
   }
 
   async function saveOwner() {
@@ -76,6 +129,7 @@ export function RequestsBoard({ mode }: { mode: "owner" | "doctor" }) {
     form.set("workStatus", workStatus);
     form.set("paymentStatus", paymentStatus);
     form.set("notes", notes);
+    form.set("lineItems", JSON.stringify(lineItems));
     if (receipt) form.set("receipt", receipt);
 
     const res = await fetch(`/api/requests/${selected.id}`, {
@@ -96,89 +150,149 @@ export function RequestsBoard({ mode }: { mode: "owner" | "doctor" }) {
     load();
   }
 
-  const custom =
-    selected?.customFields
-      ? (JSON.parse(selected.customFields) as Record<string, string>)
-      : {};
+  function RequestCard({ item }: { item: RequestItem }) {
+    const lines = parseLines(item.lineItems);
+    return (
+      <button
+        type="button"
+        className="kanban-card text-left"
+        onClick={() => openDetail(item)}
+      >
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <h3 className="text-base font-semibold m-0">{item.patientName}</h3>
+          <PaymentBadge status={item.paymentStatus} />
+        </div>
+        {mode === "owner" && (
+          <p className="text-xs text-[var(--muted)] m-0 mb-2">
+            Dr(a). {item.doctor.name}
+          </p>
+        )}
+        <div className="space-y-1 mb-3">
+          {lines.length > 0 ? (
+            lines.map((line) => (
+              <div key={line.code} className="line-chip">
+                <span className="price-code">{line.code}</span>
+                <span className="truncate">{line.name}</span>
+              </div>
+            ))
+          ) : (
+            <p className="text-sm m-0 line-clamp-2">{item.description}</p>
+          )}
+        </div>
+        <div className="flex items-center justify-between gap-2 text-xs">
+          <span className="font-semibold text-[var(--brand)]">
+            {formatCLP(item.amount)}
+          </span>
+          <span className="text-[var(--muted)]">
+            Entrega {formatDate(item.deliveryDate)}
+          </span>
+        </div>
+        {mode === "owner" && (
+          <div
+            className="mt-3 flex flex-wrap gap-1"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {item.workStatus !== "POR_TOMAR" && (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ padding: "0.35rem 0.55rem", fontSize: "0.75rem" }}
+                onClick={() =>
+                  quickUpdate(item.id, { workStatus: "POR_TOMAR" })
+                }
+              >
+                Solicitado
+              </button>
+            )}
+            {item.workStatus !== "EN_PROCESO" && (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ padding: "0.35rem 0.55rem", fontSize: "0.75rem" }}
+                onClick={() =>
+                  quickUpdate(item.id, { workStatus: "EN_PROCESO" })
+                }
+              >
+                Iniciar
+              </button>
+            )}
+            {item.workStatus !== "TERMINADO" && (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ padding: "0.35rem 0.55rem", fontSize: "0.75rem" }}
+                onClick={() =>
+                  quickUpdate(item.id, { workStatus: "TERMINADO" })
+                }
+              >
+                Terminar
+              </button>
+            )}
+            <button
+              type="button"
+              className="btn btn-secondary"
+              style={{ padding: "0.35rem 0.55rem", fontSize: "0.75rem" }}
+              onClick={() =>
+                quickUpdate(item.id, {
+                  paymentStatus:
+                    item.paymentStatus === "PAGADO" ? "NO_PAGADO" : "PAGADO",
+                })
+              }
+            >
+              {item.paymentStatus === "PAGADO" ? "Marcar no pagado" : "Marcar pagado"}
+            </button>
+          </div>
+        )}
+      </button>
+    );
+  }
 
   return (
     <div className="space-y-4">
-      <div className="panel p-4 mobile-stack row animate-rise">
-        <div>
-          <h2 className="text-2xl mb-1">
-            {mode === "owner" ? "Solicitudes de trabajo" : "Mis solicitudes"}
-          </h2>
-          <p className="text-sm text-[var(--muted)]">
-            {mode === "owner"
-              ? "Revisa trabajos, montos, estados y comprobantes."
-              : "Seguimiento de las solicitudes enviadas al laboratorio."}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <select
-            className="select"
-            style={{ width: "auto" }}
-            value={workFilter}
-            onChange={(e) => setWorkFilter(e.target.value)}
-          >
-            <option value="">Todo trabajo</option>
-            <option value="POR_TOMAR">Por tomar</option>
-            <option value="EN_PROCESO">En proceso</option>
-            <option value="TERMINADO">Terminado</option>
-          </select>
-          <select
-            className="select"
-            style={{ width: "auto" }}
-            value={paymentFilter}
-            onChange={(e) => setPaymentFilter(e.target.value)}
-          >
-            <option value="">Todo pago</option>
-            <option value="PAGADO">Pagado</option>
-            <option value="NO_PAGADO">No pagado</option>
-          </select>
-        </div>
+      <div className="panel p-4 animate-rise">
+        <h2 className="text-2xl mb-1">
+          {mode === "owner" ? "Solicitudes de trabajo" : "Mis solicitudes"}
+        </h2>
+        <p className="text-sm text-[var(--muted)] m-0">
+          Tablero por estado: Solicitado, Trabajo iniciado, Terminado y Pagado.
+        </p>
       </div>
 
       {loading ? (
         <div className="panel empty">Cargando solicitudes...</div>
-      ) : items.length === 0 ? (
-        <div className="panel empty">No hay solicitudes todavía.</div>
       ) : (
-        <div className="request-grid">
-          {items.map((item, idx) => (
-            <button
-              key={item.id}
-              type="button"
-              className={`panel p-4 text-left animate-rise delay-${(idx % 3) + 1}`}
-              onClick={() => openDetail(item)}
-            >
-              <div className="flex items-start justify-between gap-3 mb-2">
-                <div>
-                  <h3 className="text-lg font-semibold m-0">{item.patientName}</h3>
-                  {mode === "owner" && (
-                    <p className="text-sm text-[var(--muted)] m-0 mt-1">
-                      Dr(a). {item.doctor.name}
-                    </p>
-                  )}
-                </div>
-                <span className="text-sm font-semibold text-[var(--brand)]">
-                  {formatCLP(item.amount)}
-                </span>
+        <div className="kanban-board animate-rise delay-1">
+          {WORK_COLUMNS.map((col) => (
+            <section key={col.key} className="kanban-column">
+              <header className="kanban-column-header">
+                <h3>{col.title}</h3>
+                <span>{byStatus[col.key]?.length || 0}</span>
+              </header>
+              <div className="kanban-column-body">
+                {(byStatus[col.key] || []).map((item) => (
+                  <RequestCard key={item.id} item={item} />
+                ))}
+                {(byStatus[col.key] || []).length === 0 && (
+                  <p className="empty text-sm">Sin solicitudes</p>
+                )}
               </div>
-              <p className="text-sm mb-3 line-clamp-2">{item.description}</p>
-              <div className="flex flex-wrap gap-2 mb-2">
-                <span className={`badge ${WORK_STATUS_COLORS[item.workStatus]}`}>
-                  {WORK_STATUS_LABELS[item.workStatus]}
-                </span>
-                <span className={`badge ${PAYMENT_STATUS_COLORS[item.paymentStatus]}`}>
-                  {PAYMENT_STATUS_LABELS[item.paymentStatus]}
-                </span>
-              </div>
-              <p className="text-xs text-[var(--muted)] m-0">
-                Entrega: {formatDate(item.deliveryDate)} · Creada: {formatDate(item.createdAt)}
-              </p>
-            </button>
+            </section>
           ))}
+
+          <section className="kanban-column kanban-paid">
+            <header className="kanban-column-header">
+              <h3>Pagado</h3>
+              <span>{paidItems.length}</span>
+            </header>
+            <div className="kanban-column-body">
+              {paidItems.map((item) => (
+                <RequestCard key={`paid-${item.id}`} item={item} />
+              ))}
+              {paidItems.length === 0 && (
+                <p className="empty text-sm">Sin pagos registrados</p>
+              )}
+            </div>
+          </section>
         </div>
       )}
 
@@ -198,9 +312,20 @@ export function RequestsBoard({ mode }: { mode: "owner" | "doctor" }) {
                   Doctor: {selected.doctor.name} ({selected.doctor.email})
                 </p>
               </div>
-              <button className="btn btn-ghost" type="button" onClick={() => setSelected(null)}>
+              <button
+                className="btn btn-ghost"
+                type="button"
+                onClick={() => setSelected(null)}
+              >
                 Cerrar
               </button>
+            </div>
+
+            <div className="flex flex-wrap gap-2 mb-4">
+              <span className="badge status-progress">
+                {WORK_STATUS_LABELS[selected.workStatus]}
+              </span>
+              <PaymentBadge status={selected.paymentStatus} />
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 mb-4 text-sm">
@@ -212,17 +337,35 @@ export function RequestsBoard({ mode }: { mode: "owner" | "doctor" }) {
               </div>
               <div className="sm:col-span-2">
                 <strong>Descripción:</strong>
-                <p className="m-0 mt-1 whitespace-pre-wrap">{selected.description}</p>
+                <p className="m-0 mt-1 whitespace-pre-wrap">
+                  {selected.description}
+                </p>
               </div>
-              {Object.entries(custom).map(([k, v]) => (
-                <div key={k}>
-                  <strong>{k}:</strong> {String(v)}
+              <div className="sm:col-span-2">
+                <strong>Ítems:</strong>
+                <div className="mt-2 space-y-1">
+                  {parseLines(selected.lineItems).map((line) => (
+                    <div key={line.code} className="line-chip">
+                      <span className="price-code">{line.code}</span>
+                      <span>{line.name}</span>
+                      <span className="ml-auto font-semibold">
+                        {formatCLP(line.price)}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
 
             {mode === "owner" ? (
               <div className="space-y-3 border-t border-[var(--line)] pt-4">
+                <PriceItemPicker
+                  value={lineItems}
+                  onChange={(items, total) => {
+                    setLineItems(items);
+                    setAmount(String(total));
+                  }}
+                />
                 <div className="field">
                   <label className="label">Monto (CLP)</label>
                   <input
@@ -231,7 +374,6 @@ export function RequestsBoard({ mode }: { mode: "owner" | "doctor" }) {
                     min="0"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
-                    placeholder="Ej: 45000"
                   />
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -242,8 +384,8 @@ export function RequestsBoard({ mode }: { mode: "owner" | "doctor" }) {
                       value={workStatus}
                       onChange={(e) => setWorkStatus(e.target.value)}
                     >
-                      <option value="POR_TOMAR">Por tomar</option>
-                      <option value="EN_PROCESO">En proceso</option>
+                      <option value="POR_TOMAR">Solicitado</option>
+                      <option value="EN_PROCESO">Trabajo iniciado</option>
                       <option value="TERMINADO">Terminado</option>
                     </select>
                   </div>
@@ -286,7 +428,9 @@ export function RequestsBoard({ mode }: { mode: "owner" | "doctor" }) {
                     </a>
                   )}
                 </div>
-                {message && <p className="text-sm text-[var(--success)]">{message}</p>}
+                {message && (
+                  <p className="text-sm text-[var(--success)]">{message}</p>
+                )}
                 <button
                   className="btn btn-primary"
                   type="button"
@@ -298,14 +442,6 @@ export function RequestsBoard({ mode }: { mode: "owner" | "doctor" }) {
               </div>
             ) : (
               <div className="border-t border-[var(--line)] pt-4 space-y-2">
-                <div className="flex flex-wrap gap-2">
-                  <span className={`badge ${WORK_STATUS_COLORS[selected.workStatus]}`}>
-                    {WORK_STATUS_LABELS[selected.workStatus]}
-                  </span>
-                  <span className={`badge ${PAYMENT_STATUS_COLORS[selected.paymentStatus]}`}>
-                    {PAYMENT_STATUS_LABELS[selected.paymentStatus]}
-                  </span>
-                </div>
                 <p>
                   <strong>Monto:</strong> {formatCLP(selected.amount)}
                 </p>

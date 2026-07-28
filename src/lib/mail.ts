@@ -22,9 +22,9 @@ export async function sendPasswordResetEmail(
   });
 
   await transporter.sendMail({
-    from: `"ArcadaLab" <${user}>`,
+    from: `"Laboratorio Art-Dental" <${user}>`,
     to,
-    subject: "Recuperación de contraseña — ArcadaLab",
+    subject: "Recuperación de contraseña — Laboratorio Art-Dental",
     html: `
       <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
         <h2>Hola ${name},</h2>

@@ -4,6 +4,12 @@ import { z } from "zod";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+const lineItemSchema = z.object({
+  code: z.string(),
+  name: z.string(),
+  price: z.number(),
+});
+
 const createSchema = z.object({
   patientName: z.string().min(1),
   receptionDate: z.string().optional().nullable(),
@@ -11,6 +17,8 @@ const createSchema = z.object({
   description: z.string().min(1),
   notes: z.string().optional().nullable(),
   customFields: z.record(z.string(), z.unknown()).optional(),
+  lineItems: z.array(lineItemSchema).optional(),
+  amount: z.number().optional().nullable(),
 });
 
 export async function GET(req: Request) {
@@ -55,6 +63,11 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const data = createSchema.parse(body);
+    const lineItems = data.lineItems || [];
+    const amount =
+      data.amount != null
+        ? data.amount
+        : lineItems.reduce((sum, item) => sum + item.price, 0);
 
     const request = await prisma.workRequest.create({
       data: {
@@ -67,6 +80,8 @@ export async function POST(req: Request) {
         description: data.description,
         notes: data.notes || null,
         customFields: JSON.stringify(data.customFields || {}),
+        lineItems: JSON.stringify(lineItems),
+        amount: amount || null,
       },
       include: {
         doctor: { select: { id: true, name: true, email: true } },
@@ -76,7 +91,10 @@ export async function POST(req: Request) {
     return NextResponse.json(request, { status: 201 });
   } catch (e) {
     if (e instanceof z.ZodError) {
-      return NextResponse.json({ error: "Datos inválidos", details: e.issues }, { status: 400 });
+      return NextResponse.json(
+        { error: "Datos inválidos", details: e.issues },
+        { status: 400 }
+      );
     }
     return NextResponse.json({ error: "Error al crear solicitud" }, { status: 500 });
   }

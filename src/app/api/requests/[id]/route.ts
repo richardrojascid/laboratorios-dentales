@@ -74,6 +74,7 @@ export async function PATCH(
     const description = form.get("description") as string | null;
     const deliveryDate = form.get("deliveryDate") as string | null;
     const receptionDate = form.get("receptionDate") as string | null;
+    const lineItemsRaw = form.get("lineItems") as string | null;
 
     let receiptPath = existing.receiptPath;
 
@@ -104,6 +105,7 @@ export async function PATCH(
         receptionDate: receptionDate
           ? new Date(receptionDate)
           : existing.receptionDate,
+        lineItems: lineItemsRaw || existing.lineItems,
         receiptPath,
       },
       include: {
@@ -136,6 +138,10 @@ export async function PATCH(
           body.customFields !== undefined
             ? JSON.stringify(body.customFields)
             : existing.customFields,
+        lineItems:
+          body.lineItems !== undefined
+            ? JSON.stringify(body.lineItems)
+            : existing.lineItems,
       },
       include: {
         doctor: { select: { id: true, name: true, email: true } },

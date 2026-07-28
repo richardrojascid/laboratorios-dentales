@@ -1,20 +1,20 @@
 @import "tailwindcss";
 
 :root {
-  --brand: #1a5f7a;
-  --brand-dark: #134b61;
-  --brand-soft: #e6f3f5;
-  --accent: #159895;
-  --accent-warm: #f4a261;
-  --surface: #f7fbf9;
-  --surface-2: #eef6f4;
-  --ink: #14282f;
-  --muted: #5b737c;
-  --line: #cfe3e6;
-  --danger: #c45c5c;
-  --success: #2f8f6b;
+  --brand: #1f5f9a;
+  --brand-dark: #163f6b;
+  --brand-soft: #e8f2fb;
+  --accent: #4ea0d9;
+  --accent-warm: #5ba3d9;
+  --surface: #f7fbff;
+  --surface-2: #eef5fb;
+  --ink: #1a2b3a;
+  --muted: #5f7385;
+  --line: #cfe0ee;
+  --danger: #c62828;
+  --success: #1b7a45;
   --warning: #c9892d;
-  --shadow: 0 18px 50px rgba(26, 95, 122, 0.12);
+  --shadow: 0 18px 50px rgba(31, 95, 154, 0.12);
   --radius: 16px;
   --font-display: var(--font-display);
   --font-body: var(--font-body);
@@ -72,7 +72,7 @@ h3,
 }
 
 .shell {
-  width: min(1120px, calc(100% - 2rem));
+  width: min(1280px, calc(100% - 2rem));
   margin-inline: auto;
 }
 
@@ -408,4 +408,161 @@ a.role-card:hover {
     grid-template-columns: 1fr auto;
     align-items: end;
   }
+}
+
+.pay-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.28rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.pay-paid {
+  background: #1b7a45;
+}
+
+.pay-unpaid {
+  background: #c62828;
+}
+
+.kanban-board {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: 1fr;
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .kanban-board {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.kanban-column {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+}
+
+.kanban-column-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.kanban-column-header h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.kanban-column-header span {
+  background: var(--brand-soft);
+  color: var(--brand-dark);
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.kanban-column-body {
+  padding: 0.75rem;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.kanban-card {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 14px;
+  padding: 0.85rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.kanban-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.kanban-paid .kanban-column-header {
+  background: #e8f7ee;
+}
+
+.price-picker {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 0.9rem;
+  background: #fff;
+}
+
+.price-list {
+  max-height: 320px;
+  overflow: auto;
+  padding-right: 0.25rem;
+}
+
+.price-row {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  gap: 0.65rem;
+  align-items: start;
+  padding: 0.65rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.price-row.selected {
+  border-color: var(--accent);
+  background: var(--brand-soft);
+}
+
+.price-code {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 4.4rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 8px;
+  background: var(--brand-dark);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.price-name {
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+.price-amount {
+  font-weight: 700;
+  color: var(--brand-dark);
+  white-space: nowrap;
+}
+
+.price-total {
+  margin-top: 0.85rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--line);
+}
+
+.line-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8rem;
 }
