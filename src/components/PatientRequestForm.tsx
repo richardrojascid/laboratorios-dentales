@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   PriceItemPicker,
   SelectedLine,
@@ -13,17 +13,10 @@ type FormField = {
   type: string;
   options: string | null;
   required: boolean;
+  sortOrder?: number;
 };
 
-const CORE_KEYS = new Set([
-  "patientName",
-  "receptionDate",
-  "deliveryDate",
-  "description",
-  "notes",
-  "amount",
-  "prosthesisType",
-]);
+const HIDDEN_KEYS = new Set(["amount", "prosthesisType"]);
 
 export function PatientRequestForm({ onCreated }: { onCreated?: () => void }) {
   const [fields, setFields] = useState<FormField[]>([]);
@@ -39,14 +32,27 @@ export function PatientRequestForm({ onCreated }: { onCreated?: () => void }) {
       .then((r) => r.json())
       .then((data) => {
         const list = Array.isArray(data)
-          ? data.filter(
-              (f: FormField) => f.key !== "amount" && f.key !== "prosthesisType"
-            )
+          ? data.filter((f: FormField) => !HIDDEN_KEYS.has(f.key))
           : [];
         setFields(list);
       })
       .catch(() => setError("No se pudieron cargar los campos"));
   }, []);
+
+  const primaryFields = useMemo(
+    () =>
+      fields.filter((f) =>
+        ["patientName", "receptionDate", "deliveryDate"].includes(f.key)
+      ),
+    [fields]
+  );
+  const secondaryFields = useMemo(
+    () =>
+      fields.filter(
+        (f) => !["patientName", "receptionDate", "deliveryDate"].includes(f.key)
+      ),
+    [fields]
+  );
 
   function setValue(key: string, value: string) {
     setValues((prev) => ({ ...prev, [key]: value }));
@@ -60,13 +66,24 @@ export function PatientRequestForm({ onCreated }: { onCreated?: () => void }) {
 
     if (lineItems.length === 0) {
       setLoading(false);
-      setError("Selecciona al menos un trabajo de la lista de precios");
+      setError("Selecciona al menos un trabajo del catálogo (con código)");
+      return;
+    }
+
+    if (!values.patientName?.trim()) {
+      setLoading(false);
+      setError("Ingresa el nombre del paciente");
       return;
     }
 
     const customFields: Record<string, string> = {};
     for (const field of fields) {
-      if (!CORE_KEYS.has(field.key) && values[field.key]) {
+      if (
+        !["patientName", "receptionDate", "deliveryDate", "description", "notes"].includes(
+          field.key
+        ) &&
+        values[field.key]
+      ) {
         customFields[field.key] = values[field.key];
       }
     }
@@ -76,7 +93,7 @@ export function PatientRequestForm({ onCreated }: { onCreated?: () => void }) {
       lineItems.map((l) => `${l.code} ${l.name}`).join(" · ");
 
     const payload = {
-      patientName: values.patientName || "",
+      patientName: values.patientName.trim(),
       receptionDate: values.receptionDate || null,
       deliveryDate: values.deliveryDate || null,
       description,
@@ -163,16 +180,19 @@ export function PatientRequestForm({ onCreated }: { onCreated?: () => void }) {
     <form onSubmit={onSubmit} className="panel p-5 sm:p-6 animate-rise">
       <h2 className="text-2xl mb-1">Nueva solicitud de paciente</h2>
       <p className="text-[var(--muted)] mb-5 text-sm">
-        Completa los datos y selecciona los trabajos desde la lista de precios.
+        Elige los trabajos del catálogo (código + nombre). Puedes seleccionar varios.
       </p>
 
-      {fields.map((field) => (
+      {primaryFields.map((field) => (
         <div className="field" key={field.id}>
           <label className="label">
             {field.label}
-            {field.required ? " *" : ""}
+            {field.key === "patientName" || field.required ? " *" : ""}
           </label>
-          {renderField(field)}
+          {renderField({
+            ...field,
+            required: field.key === "patientName" ? true : field.required,
+          })}
         </div>
       ))}
 
@@ -184,7 +204,22 @@ export function PatientRequestForm({ onCreated }: { onCreated?: () => void }) {
             setAmount(total);
           }}
         />
+        {lineItems.length === 0 && (
+          <p className="text-xs text-[var(--danger)] mt-2 m-0">
+            Obligatorio: marca uno o más trabajos con su código.
+          </p>
+        )}
       </div>
+
+      {secondaryFields.map((field) => (
+        <div className="field" key={field.id}>
+          <label className="label">
+            {field.label}
+            {field.required ? " *" : ""}
+          </label>
+          {renderField(field)}
+        </div>
+      ))}
 
       {error && <p className="text-sm text-[var(--danger)] mb-3">{error}</p>}
       {message && <p className="text-sm text-[var(--success)] mb-3">{message}</p>}

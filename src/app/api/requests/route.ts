@@ -14,10 +14,10 @@ const createSchema = z.object({
   patientName: z.string().min(1),
   receptionDate: z.string().optional().nullable(),
   deliveryDate: z.string().optional().nullable(),
-  description: z.string().min(1),
+  description: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
   customFields: z.record(z.string(), z.unknown()).optional(),
-  lineItems: z.array(lineItemSchema).optional(),
+  lineItems: z.array(lineItemSchema).min(1, "Selecciona al menos un trabajo"),
   amount: z.number().optional().nullable(),
 });
 
@@ -51,7 +51,18 @@ export async function GET(req: Request) {
     orderBy: { createdAt: "desc" },
   });
 
-  return NextResponse.json(requests);
+  const { ensureLineItems, parseLineItems } = await import("@/lib/lineItems");
+
+  const enriched = await Promise.all(
+    requests.map(async (request) => {
+      const lines = parseLineItems(request.lineItems);
+      if (lines.length > 0) return request;
+      const ensured = await ensureLineItems(request);
+      return { ...request, lineItems: JSON.stringify(ensured) };
+    })
+  );
+
+  return NextResponse.json(enriched);
 }
 
 export async function POST(req: Request) {
@@ -63,11 +74,14 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const data = createSchema.parse(body);
-    const lineItems = data.lineItems || [];
+    const lineItems = data.lineItems;
     const amount =
       data.amount != null
         ? data.amount
         : lineItems.reduce((sum, item) => sum + item.price, 0);
+    const description =
+      (data.description || "").trim() ||
+      lineItems.map((l) => `${l.code} ${l.name}`).join(" · ");
 
     const request = await prisma.workRequest.create({
       data: {
@@ -77,7 +91,7 @@ export async function POST(req: Request) {
           ? new Date(data.receptionDate)
           : null,
         deliveryDate: data.deliveryDate ? new Date(data.deliveryDate) : null,
-        description: data.description,
+        description,
         notes: data.notes || null,
         customFields: JSON.stringify(data.customFields || {}),
         lineItems: JSON.stringify(lineItems),
@@ -92,7 +106,7 @@ export async function POST(req: Request) {
   } catch (e) {
     if (e instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Datos inválidos", details: e.issues },
+        { error: "Debes seleccionar trabajos del catálogo", details: e.issues },
         { status: 400 }
       );
     }

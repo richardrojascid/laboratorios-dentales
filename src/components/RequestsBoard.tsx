@@ -38,10 +38,24 @@ function parseLines(raw?: string | null): SelectedLine[] {
   if (!raw) return [];
   try {
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((l) => l && l.code && l.name);
   } catch {
     return [];
   }
+}
+
+function linesForCard(item: RequestItem): SelectedLine[] {
+  const lines = parseLines(item.lineItems);
+  if (lines.length > 0) return lines;
+  // Fallback visual por si llega data antigua sin códigos
+  return [
+    {
+      code: "OTR-001",
+      name: item.description || "Trabajo sin catálogo",
+      price: item.amount || 0,
+    },
+  ];
 }
 
 function PaymentBadge({ status }: { status: string }) {
@@ -151,7 +165,7 @@ export function RequestsBoard({ mode }: { mode: "owner" | "doctor" }) {
   }
 
   function RequestCard({ item }: { item: RequestItem }) {
-    const lines = parseLines(item.lineItems);
+    const lines = linesForCard(item);
     const visibleLines = lines.slice(0, 4);
     const extraCount = Math.max(0, lines.length - visibleLines.length);
 

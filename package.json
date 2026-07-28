@@ -11,7 +11,8 @@
     "lint": "eslint",
     "db:push": "node scripts/ensure-env.mjs && prisma db push",
     "db:seed": "tsx prisma/seed.ts",
-    "db:setup": "node scripts/ensure-env.mjs && prisma db push && tsx prisma/seed.ts",
+    "db:setup": "node scripts/ensure-env.mjs && prisma db push && tsx prisma/seed.ts && tsx scripts/backfill-line-items.ts",
+    "db:backfill": "tsx scripts/backfill-line-items.ts",
     "postinstall": "node scripts/ensure-env.mjs && prisma generate"
   },
   "prisma": {

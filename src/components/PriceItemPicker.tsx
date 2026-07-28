@@ -80,9 +80,9 @@ export function PriceItemPicker({
     <div className="price-picker">
       <div className="mobile-stack row mb-3">
         <div>
-          <label className="label">Trabajos a realizar (lista de precios)</label>
+          <label className="label">Catálogo de trabajos (código + nombre) *</label>
           <p className="text-xs text-[var(--muted)] m-0">
-            Selecciona uno o más ítems. El código aparece a la izquierda.
+            Marca uno o varios ítems. El código queda visible en la solicitud.
           </p>
         </div>
         <input
