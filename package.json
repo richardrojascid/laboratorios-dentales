@@ -3,8 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "node scripts/ensure-env.mjs && prisma db push",
+    "predev": "node scripts/ensure-env.mjs",
     "dev": "next dev",
+    "clean": "node -e \"const fs=require('fs'); for (const p of ['.next','node_modules/.cache']) { try { fs.rmSync(p,{recursive:true,force:true}); console.log('removed',p);} catch(e){ console.log('skip',p);} }\"",
+    "dev:clean": "npm run clean && npm run dev",
     "prebuild": "node scripts/ensure-env.mjs",
     "build": "prisma generate && next build",
     "start": "next start",

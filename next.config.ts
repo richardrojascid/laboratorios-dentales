@@ -5,11 +5,8 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
-  // Evita el warning de workspace root ambiguo (varios lockfiles en el PC)
-  outputFileTracingRoot: path.join(__dirname),
-  turbopack: {
-    root: path.join(__dirname),
-  },
+  // Usa el directorio desde el que se ejecuta npm run dev
+  outputFileTracingRoot: path.resolve(process.cwd()),
 };
 
 export default nextConfig;
