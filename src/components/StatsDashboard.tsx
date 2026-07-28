@@ -23,7 +23,11 @@ type Stats = {
   timeline: { name: string; value: number }[];
 };
 
-const COLORS = ["#1A5F7A", "#159895", "#F4A261", "#2F8F6B", "#C45C5C", "#5B737C"];
+const COLORS = ["#1F5F9A", "#4EA0D9", "#F4A261", "#1B7A45", "#C62828", "#5F7385"];
+const PAYMENT_COLORS: Record<string, string> = {
+  Pagado: "#1B7A45",
+  "No pagado": "#C62828",
+};
 
 export function StatsDashboard() {
   const [period, setPeriod] = useState("month");
@@ -140,8 +144,11 @@ export function StatsDashboard() {
                   outerRadius={90}
                   label
                 >
-                  {paymentPie.map((_, i) => (
-                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                  {paymentPie.map((entry, i) => (
+                    <Cell
+                      key={i}
+                      fill={PAYMENT_COLORS[entry.name] || COLORS[i % COLORS.length]}
+                    />
                   ))}
                 </Pie>
                 <Tooltip formatter={(v) => formatCLP(Number(v))} />

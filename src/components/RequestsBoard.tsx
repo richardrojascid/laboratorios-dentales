@@ -153,10 +153,17 @@ export function RequestsBoard({ mode }: { mode: "owner" | "doctor" }) {
   function RequestCard({ item }: { item: RequestItem }) {
     const lines = parseLines(item.lineItems);
     return (
-      <button
-        type="button"
+      <div
         className="kanban-card text-left"
+        role="button"
+        tabIndex={0}
         onClick={() => openDetail(item)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openDetail(item);
+          }
+        }}
       >
         <div className="flex items-start justify-between gap-2 mb-2">
           <h3 className="text-base font-semibold m-0">{item.patientName}</h3>
@@ -243,7 +250,7 @@ export function RequestsBoard({ mode }: { mode: "owner" | "doctor" }) {
             </button>
           </div>
         )}
-      </button>
+      </div>
     );
   }
 
