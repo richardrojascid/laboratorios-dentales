@@ -152,6 +152,9 @@ export function RequestsBoard({ mode }: { mode: "owner" | "doctor" }) {
 
   function RequestCard({ item }: { item: RequestItem }) {
     const lines = parseLines(item.lineItems);
+    const visibleLines = lines.slice(0, 4);
+    const extraCount = Math.max(0, lines.length - visibleLines.length);
+
     return (
       <div
         className="kanban-card text-left"
@@ -165,32 +168,54 @@ export function RequestsBoard({ mode }: { mode: "owner" | "doctor" }) {
           }
         }}
       >
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="text-base font-semibold m-0">{item.patientName}</h3>
+        <div className="flex items-start justify-between gap-2 mb-2 min-w-0">
+          <h3 className="text-base font-semibold m-0 min-w-0 break-words">
+            {item.patientName}
+          </h3>
           <PaymentBadge status={item.paymentStatus} />
         </div>
         {mode === "owner" && (
-          <p className="text-xs text-[var(--muted)] m-0 mb-2">
+          <p className="text-xs text-[var(--muted)] m-0 mb-2 truncate">
             Dr(a). {item.doctor.name}
           </p>
         )}
-        <div className="space-y-1 mb-3 min-w-0">
+
+        <div className="card-works mb-3">
           {lines.length > 0 ? (
-            lines.map((line) => (
-              <div key={line.code} className="line-chip" title={`${line.code} ${line.name}`}>
-                <span className="price-code">{line.code}</span>
-                <span className="line-chip-name">{line.name}</span>
+            <>
+              <div className="card-works-list">
+                {visibleLines.map((line, idx) => (
+                  <div
+                    key={`${line.code}-${idx}`}
+                    className="line-chip"
+                    title={`${line.code} — ${line.name}`}
+                  >
+                    <span className="price-code">{line.code}</span>
+                    <span className="line-chip-name">{line.name}</span>
+                  </div>
+                ))}
               </div>
-            ))
+              <div className="card-works-meta">
+                <span>
+                  {lines.length} trabajo{lines.length === 1 ? "" : "s"}
+                </span>
+                {extraCount > 0 && (
+                  <span className="card-works-more">+{extraCount} más</span>
+                )}
+              </div>
+            </>
           ) : (
-            <p className="text-sm m-0 line-clamp-2 break-words">{item.description}</p>
+            <p className="text-sm m-0 line-clamp-2 break-words">
+              {item.description}
+            </p>
           )}
         </div>
-        <div className="flex items-center justify-between gap-2 text-xs">
-          <span className="font-semibold text-[var(--brand)]">
+
+        <div className="flex items-center justify-between gap-2 text-xs min-w-0">
+          <span className="font-semibold text-[var(--brand)] shrink-0">
             {formatCLP(item.amount)}
           </span>
-          <span className="text-[var(--muted)]">
+          <span className="text-[var(--muted)] truncate">
             Entrega {formatDate(item.deliveryDate)}
           </span>
         </div>
