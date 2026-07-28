@@ -29,9 +29,9 @@ type RequestItem = {
 };
 
 const WORK_COLUMNS = [
-  { key: "POR_TOMAR", title: "Solicitado" },
-  { key: "EN_PROCESO", title: "Trabajo iniciado" },
-  { key: "TERMINADO", title: "Terminado" },
+  { key: "POR_TOMAR", title: "Solicitado", tone: "tone-requested" },
+  { key: "EN_PROCESO", title: "Trabajo iniciado", tone: "tone-started" },
+  { key: "TERMINADO", title: "Terminado", tone: "tone-finished" },
 ] as const;
 
 function parseLines(raw?: string | null): SelectedLine[] {
@@ -309,7 +309,7 @@ export function RequestsBoard({ mode }: { mode: "owner" | "doctor" }) {
       ) : (
         <div className="kanban-board animate-rise delay-1">
           {WORK_COLUMNS.map((col) => (
-            <section key={col.key} className="kanban-column">
+            <section key={col.key} className={`kanban-column ${col.tone}`}>
               <header className="kanban-column-header">
                 <h3>{col.title}</h3>
                 <span>{byStatus[col.key]?.length || 0}</span>
@@ -325,7 +325,7 @@ export function RequestsBoard({ mode }: { mode: "owner" | "doctor" }) {
             </section>
           ))}
 
-          <section className="kanban-column kanban-paid">
+          <section className="kanban-column tone-paid">
             <header className="kanban-column-header">
               <h3>Pagado</h3>
               <span>{paidItems.length}</span>

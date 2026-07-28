@@ -466,15 +466,59 @@ a.role-card:hover {
 .kanban-column-header h3 {
   margin: 0;
   font-size: 1rem;
+  font-weight: 700;
 }
 
 .kanban-column-header span {
-  background: var(--brand-soft);
-  color: var(--brand-dark);
   border-radius: 999px;
   padding: 0.15rem 0.55rem;
   font-size: 0.75rem;
   font-weight: 700;
+}
+
+/* Progresión visual: Solicitado → Iniciado → Terminado → Pagado */
+.tone-requested .kanban-column-header {
+  background: #fff3e0;
+  color: #b86a00;
+  border-bottom-color: #ffcc80;
+}
+
+.tone-requested .kanban-column-header span {
+  background: #ff9800;
+  color: #fff;
+}
+
+.tone-started .kanban-column-header {
+  background: #e3f2fd;
+  color: #1565c0;
+  border-bottom-color: #90caf9;
+}
+
+.tone-started .kanban-column-header span {
+  background: #1e88e5;
+  color: #fff;
+}
+
+.tone-finished .kanban-column-header {
+  background: #e0f2f1;
+  color: #00695c;
+  border-bottom-color: #80cbc4;
+}
+
+.tone-finished .kanban-column-header span {
+  background: #00897b;
+  color: #fff;
+}
+
+.tone-paid .kanban-column-header {
+  background: #e8f5e9;
+  color: #1b5e20;
+  border-bottom-color: #a5d6a7;
+}
+
+.tone-paid .kanban-column-header span {
+  background: #2e7d32;
+  color: #fff;
 }
 
 .kanban-column-body {
@@ -499,10 +543,6 @@ a.role-card:hover {
 .kanban-card:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow);
-}
-
-.kanban-paid .kanban-column-header {
-  background: #e8f7ee;
 }
 
 .price-picker {
