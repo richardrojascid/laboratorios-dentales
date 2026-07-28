@@ -448,8 +448,10 @@ a.role-card:hover {
   border: 1px solid var(--line);
   border-radius: 16px;
   min-height: 220px;
+  min-width: 0;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .kanban-column-header {
@@ -479,15 +481,18 @@ a.role-card:hover {
   padding: 0.75rem;
   display: grid;
   gap: 0.7rem;
+  min-width: 0;
 }
 
 .kanban-card {
   width: 100%;
+  min-width: 0;
   border: 1px solid var(--line);
   background: #fff;
   border-radius: 14px;
   padding: 0.85rem;
   cursor: pointer;
+  overflow: hidden;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -515,7 +520,7 @@ a.role-card:hover {
 
 .price-row {
   display: grid;
-  grid-template-columns: auto auto 1fr auto;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
   gap: 0.65rem;
   align-items: start;
   padding: 0.65rem 0.7rem;
@@ -533,6 +538,7 @@ a.role-card:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex: 0 0 auto;
   min-width: 4.4rem;
   padding: 0.15rem 0.4rem;
   border-radius: 8px;
@@ -541,11 +547,15 @@ a.role-card:hover {
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 
 .price-name {
   font-size: 0.9rem;
   line-height: 1.35;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .price-amount {
@@ -561,8 +571,32 @@ a.role-card:hover {
 }
 
 .line-chip {
-  display: flex;
-  align-items: center;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
   gap: 0.45rem;
   font-size: 0.8rem;
+  min-width: 0;
+  width: 100%;
+}
+
+.line-chip-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-chip.detail {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.line-chip.detail .line-chip-name {
+  -webkit-line-clamp: unset;
+  display: block;
+  overflow: visible;
 }

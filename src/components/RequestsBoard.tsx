@@ -174,16 +174,16 @@ export function RequestsBoard({ mode }: { mode: "owner" | "doctor" }) {
             Dr(a). {item.doctor.name}
           </p>
         )}
-        <div className="space-y-1 mb-3">
+        <div className="space-y-1 mb-3 min-w-0">
           {lines.length > 0 ? (
             lines.map((line) => (
-              <div key={line.code} className="line-chip">
+              <div key={line.code} className="line-chip" title={`${line.code} ${line.name}`}>
                 <span className="price-code">{line.code}</span>
-                <span className="truncate">{line.name}</span>
+                <span className="line-chip-name">{line.name}</span>
               </div>
             ))
           ) : (
-            <p className="text-sm m-0 line-clamp-2">{item.description}</p>
+            <p className="text-sm m-0 line-clamp-2 break-words">{item.description}</p>
           )}
         </div>
         <div className="flex items-center justify-between gap-2 text-xs">
@@ -352,10 +352,10 @@ export function RequestsBoard({ mode }: { mode: "owner" | "doctor" }) {
                 <strong>Ítems:</strong>
                 <div className="mt-2 space-y-1">
                   {parseLines(selected.lineItems).map((line) => (
-                    <div key={line.code} className="line-chip">
+                    <div key={line.code} className="line-chip detail">
                       <span className="price-code">{line.code}</span>
-                      <span>{line.name}</span>
-                      <span className="ml-auto font-semibold">
+                      <span className="line-chip-name">{line.name}</span>
+                      <span className="font-semibold whitespace-nowrap">
                         {formatCLP(line.price)}
                       </span>
                     </div>
